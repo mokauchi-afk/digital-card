@@ -15,7 +15,7 @@
 
   <style>
     /* =========================================================================
-       Premium Base Backdrop Layout
+       ベースレイアウト & 背景
        ========================================================================= */
     :root { --effect-color: #d4af37; }
     
@@ -36,23 +36,25 @@
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
     }
 
-    /* 3D Card Stage holding 91:55 standard aspect-ratio */
+    /* =========================================================================
+       3D名刺ステージ & 傾き・反転構造
+       ========================================================================= */
     .card-theater {
       position: relative; width: 100%; max-width: 480px; aspect-ratio: 91/55; perspective: 2500px; z-index: 10; margin: 0 auto;
     }
 
-    /* 傾き用ラッパー */
-    .card-tilt {
-      width: 100%; height: 100%; transform-style: preserve-3d;
+    /* 傾き(Tilt)専用の箱 */
+    .card-tilt { 
+      width: 100%; height: 100%; transform-style: preserve-3d; 
     }
 
-    /* Card Container (The 3D Flipper) */
+    /* 反転(Flip)専用の箱 */
     .card-container {
       width: 100%; height: 100%; transform-style: preserve-3d; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); position: relative; cursor: pointer; -webkit-tap-highlight-color: transparent;
     }
     .card-container.is-flipped { transform: rotateY(180deg); }
 
-    /* 🌟必須ルール3: 3Dフリップ時のチラつき・非表示防御 */
+    /* 3D面の基本設定 (チラつき防御) */
     .card-face {
       position: absolute; inset: 0; width: 100%; height: 100%;
       backface-visibility: hidden; -webkit-backface-visibility: hidden;
@@ -65,21 +67,26 @@
     .card-front { transform: rotateY(0deg) translateZ(1px); z-index: 2; }
     .card-back { transform: rotateY(180deg) translateZ(1px); z-index: 1; pointer-events: none; visibility: hidden; }
 
-    /* 🌟必須ルール2: 画像の歪み防止（cover指定） */
+    /* 画像の歪み防止（cover指定） */
     .card-face-image {
       position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 2; pointer-events: none;
     }
 
-    /* 910x550 Absolute Coordinate Space for Invisible Tap Targets */
+    /* =========================================================================
+       透明タップ領域（ホットスポット）: リンクを確実に起動させる
+       ========================================================================= */
     .coord-target {
       position: absolute;
       left: calc(var(--el-x, 0) / 910 * 100%); top: calc(var(--el-y, 0) / 550 * 100%);
       width: calc(var(--el-w, 100) / 910 * 100%); height: calc(var(--el-h, 50) / 550 * 100%);
-      z-index: 15; border: 1px dashed rgba(206, 186, 140, 0.0); transition: border-color 0.2s ease, background-color 0.2s ease; cursor: pointer; -webkit-tap-highlight-color: rgba(255,255,255,0.2);
+      z-index: 50; /* エフェクトよりも前面に出して確実にタップ可能にする */
+      border: 1px dashed rgba(206, 186, 140, 0.0); transition: border-color 0.2s ease, background-color 0.2s ease; 
+      cursor: pointer; -webkit-tap-highlight-color: rgba(255,255,255,0.2);
+      pointer-events: auto; /* クリックを確実に検知 */
     }
     .edit-mode-active .coord-target { border: 1px dashed rgba(206, 186, 140, 0.75) !important; background-color: rgba(206, 186, 140, 0.15) !important; }
 
-    /* 【本物のロゴ浮き出し】箔押しエフェクト */
+    /* 箔押しロゴエフェクト */
     .foil-logo {
       position: absolute; z-index: 20; pointer-events: none;
       filter: brightness(1.8) contrast(1.5) drop-shadow(0 0 8px gold) drop-shadow(0 2px 2px rgba(0,0,0,.6));
@@ -91,38 +98,46 @@
       100% { transform: translateY(0); filter: brightness(1.4) drop-shadow(0 0 4px gold); }
     }
 
-    /* 🌟修正: 【裏面】QRコードの文字被り防止（左下にコンパクトに配置） */
+    /* =========================================================================
+       🌟 究極の修正: 【裏面】QRコードの文字被り防止（右下にコンパクトに配置）
+       ========================================================================= */
     .back-info {
       position: absolute; 
-      left: 6%; 
-      bottom: 6%; 
-      width: 75px; 
+      right: 5%; /* 名刺の右側に配置 */
+      bottom: 5%; /* 名刺の下側に配置 */
+      width: 55px; /* コンパクトなサイズに制限 */
       text-align: center; 
       z-index: 30;
-      color: #111; 
-      font-weight: 700; 
-      background: rgba(255, 255, 255, 0.85); 
-      padding: 6px; 
+      color: #222; 
+      background: rgba(255, 255, 255, 0.75); /* ほんのり透けるすりガラス調 */
+      padding: 4px; 
       border-radius: 6px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
       backdrop-filter: blur(4px);
       display: flex; 
       flex-direction: column; 
       align-items: center; 
       gap: 2px;
+      pointer-events: none; /* タップは下の .coord-target(hotspot) に任せる */
     }
     .back-info img {
       width: 100%;
       height: auto;
       aspect-ratio: 1/1;
       display: block;
+      mix-blend-mode: multiply; /* 白背景に自然に馴染ませる */
     }
     .back-info-label {
       font-size: 8px;
+      font-weight: 800;
       letter-spacing: 0.05em;
+      margin-top: 2px;
+      font-family: 'Inter', sans-serif;
     }
 
-    /* エフェクト装飾 */
+    /* =========================================================================
+       光の反射・枠線エフェクト
+       ========================================================================= */
     .card-shine { position: absolute; inset: 0; pointer-events: none; z-index: 5; opacity: 0; transition: opacity 0.3s ease; background-size: 300% 300%; background-position: 100% 100%; mix-blend-mode: overlay; background: linear-gradient(115deg, transparent 20%, rgba(255,255,255,0.3) 40%, rgba(255,228,242,0.3) 50%, transparent 70%); }
     .has-pearl-shine .card-shine { opacity: 1; }
 
@@ -145,7 +160,7 @@
     .custom-scrollbar::-webkit-scrollbar-thumb { background: #33281e; border-radius: 3px; }
   </style>
 
-  <!-- 🌟必須ルール1: 裏面画像の拡張子を "IMG_7546うら.jpg" で固定 -->
+  <!-- 裏面画像の拡張子を "IMG_7546うら.jpg" で固定 -->
   <script id="gas-data" type="application/json">
   {
     "id": "nozaki_m",
@@ -193,10 +208,12 @@
 
     <!-- 3D Card Stage wrapper -->
     <div class="card-theater" id="cardStage">
+      <!-- 傾き(tilt)の箱 -->
       <div class="card-tilt" id="cardTilt">
+        <!-- 反転(flip)の箱 -->
         <div class="card-container" id="cardContainer">
           
-          <!-- FRONT FACE -->
+          <!-- FRONT FACE (表面) -->
           <div class="card-face card-front" id="cardFront">
             <div class="card-border-light-wrap" id="borderSweepWrap">
               <div class="card-border-light" id="borderSweepElement"></div>
@@ -208,6 +225,7 @@
             
             <img id="viewFrontImg" src="IMG_7545.jpg" class="card-face-image" alt="名刺表面画像" onerror="this.src='https://placehold.jp/910x550.png?text=表面画像が見つかりません';">
 
+            <!-- 連絡先ホットスポット (Z-index:50で確実にタップ可能) -->
             <div class="card-inner-targets">
               <a id="linkAddr" href="#" target="_blank" rel="noopener noreferrer" class="coord-target" style="--el-x: 320; --el-y: 380; --el-w: 520; --el-h: 40;" title="Googleマップで場所を表示"></a>
               <a id="linkTel" href="#" class="coord-target" style="--el-x: 320; --el-y: 420; --el-w: 520; --el-h: 30;" title="電話を発信"></a>
@@ -220,7 +238,7 @@
             </div>
           </div>
 
-          <!-- BACK FACE -->
+          <!-- BACK FACE (裏面) -->
           <div class="card-face card-back" id="cardBack">
             <div class="card-border-light-wrap" id="borderSweepWrapBack">
               <div class="card-border-light" id="borderSweepElementBack"></div>
@@ -232,12 +250,14 @@
             
             <img id="viewBackImg" src="IMG_7546うら.jpg" class="card-face-image" alt="名刺裏面画像" onerror="this.src='https://placehold.jp/910x550.png?text=裏面画像が見つかりません';">
             
+            <!-- 🌟QRコードを右下にコンパクトに配置 -->
             <div class="back-info">
               <img id="qrCode" src="" alt="QR">
-              <div class="back-info-label">WEB SITE</div>
+              <div class="back-info-label">SCAN ME</div>
             </div>
 
-            <a id="linkWeb" href="#" target="_blank" rel="noopener" class="coord-target hotspot" onclick="event.stopPropagation()"></a>
+            <!-- QRコード部分に被せる透明なリンク領域 -->
+            <a id="linkWeb" href="#" target="_blank" rel="noopener" class="coord-target" onclick="event.stopPropagation()"></a>
           </div>
 
         </div>
@@ -246,11 +266,13 @@
 
     <!-- ── FIXED EXTERNAL CONTROL ACTIONS ── -->
     <div class="w-full max-w-xs flex flex-col gap-3 pt-2">
+      <!-- フリップボタン -->
       <button id="btnFlipExternal" onclick="flipCardFromBtn()" class="w-full py-3 bg-[#171412] text-gray-300 border border-gray-800 rounded-lg font-sans text-xs flex items-center justify-center gap-2 hover:border-[#ceba8c] hover:text-[#ceba8c] transition active:scale-[0.97] duration-150 relative z-20">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
         <span id="btnFlipText">裏面を表示する（タップ回転）</span>
       </button>
 
+      <!-- vCardダウンロードボタン -->
       <button onclick="downloadVCard()" class="w-full py-3.5 bg-gradient-to-r from-[#211a13] via-[#120e0a] to-[#211a13] text-[#ceba8c] border border-[#6b5842] rounded-lg font-serif tracking-[0.2em] text-xs flex items-center justify-center gap-2 shadow-xl hover:border-[#8e765a] hover:text-white transition active:scale-[0.97] duration-150 relative z-20">
         <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
           <path d="M10 2v11M6 9l4 4 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
@@ -263,7 +285,7 @@
   </div>
 
   <!-- =======================================================================
-       RIGHT: REAL-TIME EDITING STUDIO (HTML復元によりJSエラーを完全防止)
+       RIGHT: REAL-TIME EDITING STUDIO (Admin secret panel)
        ======================================================================= -->
   <button id="btnStudioTrigger" onclick="toggleStudioPanel()" class="fixed bottom-4 right-4 z-50 p-3.5 bg-[#1e1712]/95 text-[#ceba8c] border border-[#524131] rounded-full shadow-2xl hover:bg-[#30251c] active:scale-95 transition flex items-center justify-center hidden" title="秘密の編集スタジオ">
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -429,6 +451,7 @@
       const rotX = -currentY * 11;
       const rotY = currentX * 11;
       
+      // 傾きは cardTilt に適用
       cardTilt.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
       requestAnimationFrame(runCardAnimationLoop);
     }
@@ -442,12 +465,14 @@
     });
     document.addEventListener('mouseleave', function() { targetX = 0; targetY = 0; });
 
-    // --- 🌟必須ルール3: 3Dフリップ時のチラつき・非表示防御 ---
+    // --- 3Dフリップ時のチラつき・非表示防御 ---
     let isFlipped = false;
     let isFlippingNow = false;
     
     function flipCard(e) {
-      if (e && e.target && e.target.closest('a')) return; 
+      // リンクがタップされた場合は反転させない
+      if (e && e.target && e.target.tagName.toLowerCase() === 'a') return; 
+      
       if (isFlippingNow) return;
       isFlippingNow = true;
       isFlipped = !isFlipped;
@@ -458,22 +483,20 @@
       const front = document.getElementById('cardFront');
       const back = document.getElementById('cardBack');
 
-      // ① 300ms（回転の中間地点）で visibility と pointer-events を切り替える
       setTimeout(() => {
         if (isFlipped) {
           front.style.visibility = 'hidden';
           front.style.pointerEvents = 'none';
           back.style.visibility = 'visible';
-          back.style.pointerEvents = 'auto';
+          back.style.pointerEvents = 'auto'; // 裏面のリンクを有効化
         } else {
           back.style.visibility = 'hidden';
           back.style.pointerEvents = 'none';
           front.style.visibility = 'visible';
-          front.style.pointerEvents = 'auto';
+          front.style.pointerEvents = 'auto'; // 表面のリンクを有効化
         }
       }, 300);
 
-      // ② 600ms（回転終了地点）で連打ロックを解除する
       setTimeout(() => {
         isFlippingNow = false;
       }, 600);
@@ -546,7 +569,7 @@
       const fImg = document.getElementById('inputFrontImgUrl').value.trim();
       const bImg = document.getElementById('inputBackImgUrl').value.trim();
       
-      // 🌟必須ルール5: 日本語ファイル名の文字化け・リンク切れ防止
+      // 日本語ファイル名の文字化け・リンク切れ防止
       if (fImg !== "") { document.getElementById('viewFrontImg').src = encodeURI(fImg); }
       if (bImg !== "") { document.getElementById('viewBackImg').src = encodeURI(bImg); }
 
@@ -583,10 +606,11 @@
       linkEmail.style.setProperty('--el-w', document.getElementById('coordEmailW').value);
       linkEmail.style.setProperty('--el-h', document.getElementById('coordEmailH').value);
 
-      // 🌟必須ルール4: Google Mapsリンクの正しい構文
+      // Google Mapsリンクの正しい構文
       const cleanAddress = document.getElementById('inputVCardAddr').value.replace(/〒?\d{3}-\d{4}\s*/, '');
-      linkAddr.href = `https://maps.google.com/?q=${encodeURIComponent(cleanAddress)}`;
+      linkAddr.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(cleanAddress)}`;
       
+      // 各種リンクの反映
       document.getElementById('linkTel').href = `tel:${document.getElementById('inputVCardTel').value.replace(/[^\d-]/g, '')}`;
       document.getElementById('linkFax').href = `tel:${document.getElementById('inputVCardFax').value.replace(/[^\d-]/g, '')}`;
       document.getElementById('linkMobile').href = `tel:${document.getElementById('inputVCardMobile').value.replace(/[^\d-]/g, '')}`;
@@ -595,15 +619,15 @@
       // QRコードの反映とホットスポット位置
       const webUrl = document.getElementById('inputVCardWeb').value;
       if(webUrl) {
+        // 余計なURL表示は消し、SCAN ME だけ残す
         document.getElementById('qrCode').src = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=" + encodeURIComponent(webUrl);
-        document.getElementById('websiteText').textContent = webUrl.replace(/^https?:\/\//, '');
         
         const webBack = document.getElementById('linkWeb');
-        // 左下のQR領域に被せる
-        webBack.style.setProperty('--el-x', 50);  
-        webBack.style.setProperty('--el-y', 420); 
-        webBack.style.setProperty('--el-w', 120); 
-        webBack.style.setProperty('--el-h', 80);  
+        // 右下に配置したQR領域に被せる (X: 790付近, Y: 390付近)
+        webBack.style.setProperty('--el-x', 790);  
+        webBack.style.setProperty('--el-y', 390); 
+        webBack.style.setProperty('--el-w', 80); 
+        webBack.style.setProperty('--el-h', 100);  
         webBack.href = webUrl;
       }
 
@@ -643,7 +667,7 @@
         }
       }
 
-      // 初回同期を実行（スタジオのHTMLが復元されたためエラーなく通ります）
+      // 初回同期を実行
       syncStudioToView();
 
       const urlParams = new URLSearchParams(window.location.search);
