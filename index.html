@@ -41,9 +41,9 @@
       position: relative; width: 100%; max-width: 480px; aspect-ratio: 91/55; perspective: 2500px; z-index: 10; margin: 0 auto;
     }
 
-    /* 🌟修正: 傾き(tilt)専用のレイヤーを追加 */
-    .card-tilt { 
-      width: 100%; height: 100%; transform-style: preserve-3d; 
+    /* 傾き用ラッパー */
+    .card-tilt {
+      width: 100%; height: 100%; transform-style: preserve-3d;
     }
 
     /* Card Container (The 3D Flipper) */
@@ -52,7 +52,7 @@
     }
     .card-container.is-flipped { transform: rotateY(180deg); }
 
-    /* 3Dフリップ時のチラつき・非表示バグの防御 */
+    /* 🌟必須ルール3: 3Dフリップ時のチラつき・非表示防御 */
     .card-face {
       position: absolute; inset: 0; width: 100%; height: 100%;
       backface-visibility: hidden; -webkit-backface-visibility: hidden;
@@ -65,7 +65,7 @@
     .card-front { transform: rotateY(0deg) translateZ(1px); z-index: 2; }
     .card-back { transform: rotateY(180deg) translateZ(1px); z-index: 1; pointer-events: none; visibility: hidden; }
 
-    /* 画像の歪み防止（cover指定） */
+    /* 🌟必須ルール2: 画像の歪み防止（cover指定） */
     .card-face-image {
       position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 2; pointer-events: none;
     }
@@ -91,26 +91,35 @@
       100% { transform: translateY(0); filter: brightness(1.4) drop-shadow(0 0 4px gold); }
     }
 
-    /* 【裏面】QRコードの文字被り防止（左下に小さく配置） */
+    /* 🌟修正: 【裏面】QRコードの文字被り防止（左下にコンパクトに配置） */
     .back-info {
       position: absolute; 
       left: 6%; 
-      bottom: 8%; 
+      bottom: 6%; 
+      width: 75px; 
       text-align: center; 
       z-index: 30;
       color: #111; 
       font-weight: 700; 
-      font-size: 9px;
       background: rgba(255, 255, 255, 0.85); 
       padding: 6px; 
       border-radius: 6px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
       backdrop-filter: blur(4px);
       display: flex; 
       flex-direction: column; 
       align-items: center; 
       gap: 2px;
-      width: fit-content;
+    }
+    .back-info img {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 1/1;
+      display: block;
+    }
+    .back-info-label {
+      font-size: 8px;
+      letter-spacing: 0.05em;
     }
 
     /* エフェクト装飾 */
@@ -136,7 +145,7 @@
     .custom-scrollbar::-webkit-scrollbar-thumb { background: #33281e; border-radius: 3px; }
   </style>
 
-  <!-- 裏面画像の拡張子を "IMG_7546うら.jpg" で固定 -->
+  <!-- 🌟必須ルール1: 裏面画像の拡張子を "IMG_7546うら.jpg" で固定 -->
   <script id="gas-data" type="application/json">
   {
     "id": "nozaki_m",
@@ -184,7 +193,6 @@
 
     <!-- 3D Card Stage wrapper -->
     <div class="card-theater" id="cardStage">
-      <!-- 🌟修正: 傾き(tilt)と反転(flip)の競合を防ぐための新しい箱を追加 -->
       <div class="card-tilt" id="cardTilt">
         <div class="card-container" id="cardContainer">
           
@@ -200,7 +208,6 @@
             
             <img id="viewFrontImg" src="IMG_7545.jpg" class="card-face-image" alt="名刺表面画像" onerror="this.src='https://placehold.jp/910x550.png?text=表面画像が見つかりません';">
 
-            <!-- 連絡先ホットスポット (見えないリンク) -->
             <div class="card-inner-targets">
               <a id="linkAddr" href="#" target="_blank" rel="noopener noreferrer" class="coord-target" style="--el-x: 320; --el-y: 380; --el-w: 520; --el-h: 40;" title="Googleマップで場所を表示"></a>
               <a id="linkTel" href="#" class="coord-target" style="--el-x: 320; --el-y: 420; --el-w: 520; --el-h: 30;" title="電話を発信"></a>
@@ -225,11 +232,9 @@
             
             <img id="viewBackImg" src="IMG_7546うら.jpg" class="card-face-image" alt="名刺裏面画像" onerror="this.src='https://placehold.jp/910x550.png?text=裏面画像が見つかりません';">
             
-            <!-- QRコードとテキストを左下の専用領域に配置 -->
             <div class="back-info">
-              <img id="qrCode" src="" alt="QR" style="width:40px; height:40px;">
-              <div style="margin-top:2px; font-size:8px;">WEB SITE</div>
-              <div id="websiteText" style="font-size:8px; word-break:break-all; max-width: 80px;"></div>
+              <img id="qrCode" src="" alt="QR">
+              <div class="back-info-label">WEB SITE</div>
             </div>
 
             <a id="linkWeb" href="#" target="_blank" rel="noopener" class="coord-target hotspot" onclick="event.stopPropagation()"></a>
@@ -241,13 +246,11 @@
 
     <!-- ── FIXED EXTERNAL CONTROL ACTIONS ── -->
     <div class="w-full max-w-xs flex flex-col gap-3 pt-2">
-      <!-- フリップボタン -->
       <button id="btnFlipExternal" onclick="flipCardFromBtn()" class="w-full py-3 bg-[#171412] text-gray-300 border border-gray-800 rounded-lg font-sans text-xs flex items-center justify-center gap-2 hover:border-[#ceba8c] hover:text-[#ceba8c] transition active:scale-[0.97] duration-150 relative z-20">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
         <span id="btnFlipText">裏面を表示する（タップ回転）</span>
       </button>
 
-      <!-- vCardダウンロードボタン -->
       <button onclick="downloadVCard()" class="w-full py-3.5 bg-gradient-to-r from-[#211a13] via-[#120e0a] to-[#211a13] text-[#ceba8c] border border-[#6b5842] rounded-lg font-serif tracking-[0.2em] text-xs flex items-center justify-center gap-2 shadow-xl hover:border-[#8e765a] hover:text-white transition active:scale-[0.97] duration-150 relative z-20">
         <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
           <path d="M10 2v11M6 9l4 4 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
@@ -260,7 +263,7 @@
   </div>
 
   <!-- =======================================================================
-       RIGHT: REAL-TIME EDITING STUDIO (Admin secret panel)
+       RIGHT: REAL-TIME EDITING STUDIO (HTML復元によりJSエラーを完全防止)
        ======================================================================= -->
   <button id="btnStudioTrigger" onclick="toggleStudioPanel()" class="fixed bottom-4 right-4 z-50 p-3.5 bg-[#1e1712]/95 text-[#ceba8c] border border-[#524131] rounded-full shadow-2xl hover:bg-[#30251c] active:scale-95 transition flex items-center justify-center hidden" title="秘密の編集スタジオ">
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -328,7 +331,6 @@
             </div>
           </div>
 
-          <!-- 🌟修正: 各連絡先の座標入力欄を復元 -->
           <div class="space-y-2 border-b border-gray-800/60 pb-3">
             <span class="font-bold text-gray-300 block">② 代表電話番号</span>
             <div class="grid grid-cols-4 gap-2">
@@ -336,6 +338,10 @@
               <div><label class="text-[8.5px] text-gray-500">Y</label><input type="number" id="coordTelY" value="420" class="w-full bg-[#2a2420] border border-gray-700 rounded p-1 text-center text-white"></div>
               <div><label class="text-[8.5px] text-gray-500">W</label><input type="number" id="coordTelW" value="520" class="w-full bg-[#2a2420] border border-gray-700 rounded p-1 text-center text-white"></div>
               <div><label class="text-[8.5px] text-gray-500">H</label><input type="number" id="coordTelH" value="30" class="w-full bg-[#2a2420] border border-gray-700 rounded p-1 text-center text-white"></div>
+            </div>
+            <div class="mt-1">
+              <label class="block text-[9px] text-gray-500">連動する代表電話</label>
+              <input type="text" id="inputVCardTel" value="(087) 847-6116(代)" class="w-full bg-[#2a2420] border border-gray-700 rounded px-2 py-1 text-[11px] text-white">
             </div>
           </div>
 
@@ -347,6 +353,10 @@
               <div><label class="text-[8.5px] text-gray-500">W</label><input type="number" id="coordFaxW" value="520" class="w-full bg-[#2a2420] border border-gray-700 rounded p-1 text-center text-white"></div>
               <div><label class="text-[8.5px] text-gray-500">H</label><input type="number" id="coordFaxH" value="30" class="w-full bg-[#2a2420] border border-gray-700 rounded p-1 text-center text-white"></div>
             </div>
+            <div class="mt-1">
+              <label class="block text-[9px] text-gray-500">連動するFAX</label>
+              <input type="text" id="inputVCardFax" value="(087) 847-6195" class="w-full bg-[#2a2420] border border-gray-700 rounded px-2 py-1 text-[11px] text-white">
+            </div>
           </div>
 
           <div class="space-y-2 border-b border-gray-800/60 pb-3">
@@ -357,10 +367,28 @@
               <div><label class="text-[8.5px] text-gray-500">W</label><input type="number" id="coordMobileW" value="520" class="w-full bg-[#2a2420] border border-gray-700 rounded p-1 text-center text-white"></div>
               <div><label class="text-[8.5px] text-gray-500">H</label><input type="number" id="coordMobileH" value="30" class="w-full bg-[#2a2420] border border-gray-700 rounded p-1 text-center text-white"></div>
             </div>
+            <div class="mt-1">
+              <label class="block text-[9px] text-gray-500">連動する携帯番号</label>
+              <input type="text" id="inputVCardMobile" value="080-1992-2079" class="w-full bg-[#2a2420] border border-gray-700 rounded px-2 py-1 text-[11px] text-white">
+            </div>
+          </div>
+
+          <div class="space-y-2 border-b border-gray-800/60 pb-3">
+            <span class="font-bold text-gray-300 block">⑤ E-mail</span>
+            <div class="grid grid-cols-4 gap-2">
+              <div><label class="text-[8.5px] text-gray-500">X</label><input type="number" id="coordEmailX" value="320" class="w-full bg-[#2a2420] border border-gray-700 rounded p-1 text-center text-white"></div>
+              <div><label class="text-[8.5px] text-gray-500">Y</label><input type="number" id="coordEmailY" value="500" class="w-full bg-[#2a2420] border border-gray-700 rounded p-1 text-center text-white"></div>
+              <div><label class="text-[8.5px] text-gray-500">W</label><input type="number" id="coordEmailW" value="520" class="w-full bg-[#2a2420] border border-gray-700 rounded p-1 text-center text-white"></div>
+              <div><label class="text-[8.5px] text-gray-500">H</label><input type="number" id="coordEmailH" value="30" class="w-full bg-[#2a2420] border border-gray-700 rounded p-1 text-center text-white"></div>
+            </div>
+            <div class="mt-1">
+              <label class="block text-[9px] text-gray-500">連動するEmail</label>
+              <input type="text" id="inputVCardEmail" value="kyokuto@mwb.biglobe.ne.jp" class="w-full bg-[#2a2420] border border-gray-700 rounded px-2 py-1 text-[11px] text-white">
+            </div>
           </div>
 
           <div class="space-y-2 pb-3">
-            <span class="font-bold text-gray-300 block">⑤ 連絡先保存（vCard）テキスト</span>
+            <span class="font-bold text-gray-300 block">⑥ 連絡先保存（vCard）用テキスト</span>
             <div class="grid grid-cols-2 gap-3">
               <div>
                 <label class="text-[9px] text-gray-500">会社名</label>
@@ -369,23 +397,6 @@
               <div>
                 <label class="text-[9px] text-gray-500">氏名</label>
                 <input type="text" id="inputVCardName" value="野崎元宏" class="w-full bg-[#2a2420] border border-gray-700 rounded px-2 py-1 text-[11px] text-white">
-              </div>
-              <div>
-                <label class="text-[9px] text-gray-500">代表電話番号</label>
-                <input type="text" id="inputVCardTel" value="(087) 847-6116(代)" class="w-full bg-[#2a2420] border border-gray-700 rounded px-2 py-1 text-[11px] text-white">
-              </div>
-              <!-- 🌟修正: 携帯電話とFAXのテキスト入力欄を復元 -->
-              <div>
-                <label class="text-[9px] text-gray-500">携帯電話</label>
-                <input type="text" id="inputVCardMobile" value="080-1992-2079" class="w-full bg-[#2a2420] border border-gray-700 rounded px-2 py-1 text-[11px] text-white">
-              </div>
-              <div>
-                <label class="text-[9px] text-gray-500">FAX番号</label>
-                <input type="text" id="inputVCardFax" value="(087) 847-6195" class="w-full bg-[#2a2420] border border-gray-700 rounded px-2 py-1 text-[11px] text-white">
-              </div>
-              <div>
-                <label class="text-[9px] text-gray-500">E-mail</label>
-                <input type="text" id="inputVCardEmail" value="kyokuto@mwb.biglobe.ne.jp" class="w-full bg-[#2a2420] border border-gray-700 rounded px-2 py-1 text-[11px] text-white">
               </div>
               <div class="col-span-2">
                 <label class="text-[9px] text-gray-500">WEBサイトURL（裏面用）</label>
@@ -407,7 +418,7 @@
     let globalCardData = {};
 
     const cardContainer = document.getElementById('cardContainer');
-    const cardTilt = document.getElementById('cardTilt'); // 🌟修正: 傾き用の新しい箱を取得
+    const cardTilt = document.getElementById('cardTilt'); 
     let currentX = 0, currentY = 0, targetX = 0, targetY = 0;
 
     // --- 3D Rotation Animation Loop ---
@@ -418,7 +429,6 @@
       const rotX = -currentY * 11;
       const rotY = currentX * 11;
       
-      // 🌟修正: 傾きは cardTilt に適用し、cardContainer の反転(transform)と分離
       cardTilt.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
       requestAnimationFrame(runCardAnimationLoop);
     }
@@ -432,7 +442,7 @@
     });
     document.addEventListener('mouseleave', function() { targetX = 0; targetY = 0; });
 
-    // --- 3Dフリップ時のチラつき・非表示バグの防御 ---
+    // --- 🌟必須ルール3: 3Dフリップ時のチラつき・非表示防御 ---
     let isFlipped = false;
     let isFlippingNow = false;
     
@@ -448,6 +458,7 @@
       const front = document.getElementById('cardFront');
       const back = document.getElementById('cardBack');
 
+      // ① 300ms（回転の中間地点）で visibility と pointer-events を切り替える
       setTimeout(() => {
         if (isFlipped) {
           front.style.visibility = 'hidden';
@@ -462,6 +473,7 @@
         }
       }, 300);
 
+      // ② 600ms（回転終了地点）で連打ロックを解除する
       setTimeout(() => {
         isFlippingNow = false;
       }, 600);
@@ -495,7 +507,7 @@
     function downloadVCard() {
       const org = document.getElementById('inputVCardCompany').value;
       const name = document.getElementById('inputVCardName').value;
-      const title = document.getElementById('inputVCardTitle') ? document.getElementById('inputVCardTitle').value : '営業部長';
+      const title = '営業部長'; // ダミーまたは必要に応じて追加
       const tel = document.getElementById('inputVCardTel').value;
       const mobile = document.getElementById('inputVCardMobile').value;
       const fax = document.getElementById('inputVCardFax').value;
@@ -530,9 +542,11 @@
     }
 
     function syncStudioToView() {
+      // Input値の反映
       const fImg = document.getElementById('inputFrontImgUrl').value.trim();
       const bImg = document.getElementById('inputBackImgUrl').value.trim();
       
+      // 🌟必須ルール5: 日本語ファイル名の文字化け・リンク切れ防止
       if (fImg !== "") { document.getElementById('viewFrontImg').src = encodeURI(fImg); }
       if (bImg !== "") { document.getElementById('viewBackImg').src = encodeURI(bImg); }
 
@@ -545,7 +559,6 @@
       linkAddr.style.setProperty('--el-w', document.getElementById('coordAddrW').value);
       linkAddr.style.setProperty('--el-h', document.getElementById('coordAddrH').value);
 
-      // 🌟修正: FAX, 携帯電話の座標反映を追加
       const linkTel = document.getElementById('linkTel');
       linkTel.style.setProperty('--el-x', document.getElementById('coordTelX').value);
       linkTel.style.setProperty('--el-y', document.getElementById('coordTelY').value);
@@ -564,10 +577,16 @@
       linkMobile.style.setProperty('--el-w', document.getElementById('coordMobileW').value);
       linkMobile.style.setProperty('--el-h', document.getElementById('coordMobileH').value);
 
+      const linkEmail = document.getElementById('linkEmail');
+      linkEmail.style.setProperty('--el-x', document.getElementById('coordEmailX').value);
+      linkEmail.style.setProperty('--el-y', document.getElementById('coordEmailY').value);
+      linkEmail.style.setProperty('--el-w', document.getElementById('coordEmailW').value);
+      linkEmail.style.setProperty('--el-h', document.getElementById('coordEmailH').value);
+
+      // 🌟必須ルール4: Google Mapsリンクの正しい構文
       const cleanAddress = document.getElementById('inputVCardAddr').value.replace(/〒?\d{3}-\d{4}\s*/, '');
-      linkAddr.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(cleanAddress)}`;
+      linkAddr.href = `https://maps.google.com/?q=${encodeURIComponent(cleanAddress)}`;
       
-      // 🌟修正: 各種リンクの反映
       document.getElementById('linkTel').href = `tel:${document.getElementById('inputVCardTel').value.replace(/[^\d-]/g, '')}`;
       document.getElementById('linkFax').href = `tel:${document.getElementById('inputVCardFax').value.replace(/[^\d-]/g, '')}`;
       document.getElementById('linkMobile').href = `tel:${document.getElementById('inputVCardMobile').value.replace(/[^\d-]/g, '')}`;
@@ -576,10 +595,11 @@
       // QRコードの反映とホットスポット位置
       const webUrl = document.getElementById('inputVCardWeb').value;
       if(webUrl) {
-        document.getElementById('websiteText').textContent = webUrl.replace(/^https?:\/\//, '');
         document.getElementById('qrCode').src = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=" + encodeURIComponent(webUrl);
+        document.getElementById('websiteText').textContent = webUrl.replace(/^https?:\/\//, '');
         
         const webBack = document.getElementById('linkWeb');
+        // 左下のQR領域に被せる
         webBack.style.setProperty('--el-x', 50);  
         webBack.style.setProperty('--el-y', 420); 
         webBack.style.setProperty('--el-w', 120); 
@@ -623,6 +643,7 @@
         }
       }
 
+      // 初回同期を実行（スタジオのHTMLが復元されたためエラーなく通ります）
       syncStudioToView();
 
       const urlParams = new URLSearchParams(window.location.search);
