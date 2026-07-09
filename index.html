@@ -104,11 +104,11 @@
        ========================================================================= */
     .back-info {
       position: absolute; 
-      left: 3%;    
-      bottom: 3%;  
+      left: 10px;    /* 絶対ピクセルで左下端に完全固定 */
+      bottom: 10px;  
       z-index: 30;
       background: rgba(255, 255, 255, 0.85); 
-      padding: 4px 6px; 
+      padding: 4px; 
       border-radius: 4px;
       display: flex; 
       flex-direction: row; 
@@ -117,20 +117,23 @@
       box-shadow: 0 2px 8px rgba(0,0,0,0.15);
       backdrop-filter: blur(2px);
       pointer-events: none; 
+      max-width: 140px; /* 物理的な最大幅を設定して文字被りを徹底排除 */
     }
     .back-info img {
-      width: 26px;  /* 物理的に極小サイズを指定 */
-      height: 26px; 
+      width: 24px;  /* 物理的に極小サイズを指定 */
+      height: 24px; 
       mix-blend-mode: multiply; 
       display: block;
+      flex-shrink: 0;
     }
     .back-info-text {
       display: flex;
       flex-direction: column;
       justify-content: center;
+      overflow: hidden;
     }
     .back-info-label {
-      font-size: 6px;
+      font-size: 5.5px;
       font-weight: 800;
       color: #555;
       letter-spacing: 0.05em;
@@ -139,12 +142,15 @@
       font-family: 'Inter', sans-serif;
     }
     .back-info-url {
-      font-size: 8px;
+      font-size: 7px;
       font-weight: 700;
       color: #111;
       white-space: nowrap; 
+      overflow: hidden;
+      text-overflow: ellipsis; /* URLが長すぎる場合は...表記にしてはみ出さない */
       line-height: 1;
       font-family: 'Inter', sans-serif;
+      max-width: 100px;
     }
 
     /* =========================================================================
@@ -208,7 +214,7 @@
 
   <div class="flex-1 flex flex-col items-center justify-center p-6 md:p-12 space-y-8 relative">
     
-    <!-- 🌟 修正1: 会社名テキストを削除し、Paper-Faithful Digital Twin だけを残す -->
+    <!-- 🌟 修正1: 会社名テキストを完全に削除し、Paper-Faithful Digital Twin だけを残す -->
     <div class="text-center space-y-1">
       <span class="text-[9px] tracking-[0.35em] uppercase text-[#ceba8c] font-bold">Paper-Faithful Digital Twin</span>
     </div>
@@ -425,7 +431,7 @@
                 <input type="text" id="inputVCardName" value="野﨑 元宏" class="w-full bg-[#2a2420] border border-gray-700 rounded px-2 py-1 text-[11px] text-white">
               </div>
               <div class="col-span-2">
-                <label class="text-[9px] text-gray-500">WEBサイトURL（裏面用）</label>
+                <label class="text-[9px] text-gray-500">WEBサイトURL（裏面用・保存用）</label>
                 <input type="text" id="inputVCardWeb" value="https://kyokutoukougyou.net/" class="w-full bg-[#2a2420] border border-gray-700 rounded px-2 py-1 text-[11px] text-white">
               </div>
             </div>
@@ -520,7 +526,7 @@
       setTimeout(() => { t.style.display = 'none'; }, 3000);
     }
 
-    // --- 🌟 vCard (連絡先保存) 完全ロジック ---
+    // --- 🌟 vCard (連絡先保存) 完全強化ロジック ---
     function downloadVCard() {
       const org = document.getElementById('inputVCardCompany').value;
       const name = document.getElementById('inputVCardName').value;
@@ -530,8 +536,12 @@
       const fax = document.getElementById('inputVCardFax').value;
       const email = document.getElementById('inputVCardEmail').value;
       const address = document.getElementById('inputVCardAddr').value;
-      const pageUrl = window.location.href.split('?')[0]; 
+      
+      // 🌟 デジタル名刺自体のURLと会社HPのURLを取得
+      const myCardUrl = window.location.href;
+      const companyHp = document.getElementById('inputVCardWeb').value;
 
+      // 🌟 vCardの内容にURLとGoogleマップリンクを全て追加
       const lines = [
         'BEGIN:VCARD', 'VERSION:3.0',
         `N:;${name};;;`, `FN:${name}`, `ORG:${org}`, `TITLE:${title}`,
@@ -540,7 +550,9 @@
         `TEL;TYPE=WORK,FAX:${fax.replace(/[^\d+()]/g, '')}`,
         `EMAIL;TYPE=WORK:${email}`,
         `ADR;TYPE=WORK:;;${address};;;;日本`,
-        `URL:${pageUrl}`,
+        `URL;TYPE=WORK:${companyHp}`,
+        `URL;TYPE=PROFILE:${myCardUrl}`,
+        `NOTE:【デジタル名刺URL】\\n${myCardUrl}\\n\\n【Googleマップ】\\nhttps://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`,
         'END:VCARD'
       ];
       
@@ -564,6 +576,10 @@
       const bImg = document.getElementById('inputBackImgUrl').value.trim();
       if (fImg !== "") { document.getElementById('viewFrontImg').src = encodeURI(fImg); }
       if (bImg !== "") { document.getElementById('viewBackImg').src = encodeURI(bImg); }
+
+      // 🌟 エラー原因だった不要な会社名更新コードを完全に削除し、安全チェックを追加
+      const dispComp = document.getElementById('dispCompany');
+      if (dispComp) { dispComp.textContent = document.getElementById('inputVCardCompany').value; }
 
       // 住所ホットスポットの座標反映
       const linkAddr = document.getElementById('linkAddr');
@@ -626,7 +642,7 @@
       rootB.classList.toggle('has-sweep-shine', sweepShine);
       document.body.classList.toggle('has-border-sweep', borderSweep);
       
-      // 🌟 エンボス（浮き出し）強調フィルターの適用
+      // エンボス（浮き出し）強調フィルターの適用
       rootF.classList.toggle('has-emboss-filter', embossFilter);
     }
 
