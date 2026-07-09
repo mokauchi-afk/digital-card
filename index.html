@@ -75,7 +75,7 @@
     }
 
     /* =========================================================================
-       透明タップ領域（ホットスポット）: リンクを確実に起動させる
+       透明タップ領域（ホットスポット）
        ========================================================================= */
     .coord-target {
       position: absolute;
@@ -100,11 +100,11 @@
     }
 
     /* =========================================================================
-       🌟 究極の美：QRコードとURLの左下・被りゼロ・横並び配置 (絶対ピクセル指定版)
+       🌟 究極の美：QRコードとURLの左下・被りゼロ・横並び配置
        ========================================================================= */
     .back-info {
       position: absolute; 
-      left: 10px;    /* 絶対ピクセルで左下端に完全固定 */
+      left: 10px;    
       bottom: 10px;  
       z-index: 30;
       background: rgba(255, 255, 255, 0.85); 
@@ -117,10 +117,10 @@
       box-shadow: 0 2px 8px rgba(0,0,0,0.15);
       backdrop-filter: blur(2px);
       pointer-events: none; 
-      max-width: 140px; /* 物理的な最大幅を設定して文字被りを徹底排除 */
+      max-width: 140px; 
     }
     .back-info img {
-      width: 24px;  /* 物理的に極小サイズを指定 */
+      width: 24px;  
       height: 24px; 
       mix-blend-mode: multiply; 
       display: block;
@@ -147,7 +147,7 @@
       color: #111;
       white-space: nowrap; 
       overflow: hidden;
-      text-overflow: ellipsis; /* URLが長すぎる場合は...表記にしてはみ出さない */
+      text-overflow: ellipsis; 
       line-height: 1;
       font-family: 'Inter', sans-serif;
       max-width: 100px;
@@ -214,7 +214,7 @@
 
   <div class="flex-1 flex flex-col items-center justify-center p-6 md:p-12 space-y-8 relative">
     
-    <!-- 🌟 修正1: 会社名テキストを完全に削除し、Paper-Faithful Digital Twin だけを残す -->
+    <!-- 🌟 会社名を削除し、小さな「Paper-Faithful Digital Twin」のみを残す -->
     <div class="text-center space-y-1">
       <span class="text-[9px] tracking-[0.35em] uppercase text-[#ceba8c] font-bold">Paper-Faithful Digital Twin</span>
     </div>
@@ -258,7 +258,7 @@
             
             <img id="viewBackImg" src="IMG_7546うら.jpg" class="card-face-image" alt="名刺裏面" onerror="this.src='https://placehold.jp/910x550.png?text=Image+Not+Found';">
             
-            <!-- QRコードとURL -->
+            <!-- QRコードとURL (左下固定) -->
             <div class="back-info" id="qrContainer">
               <img id="qrCode" src="" alt="QR">
               <div class="back-info-text">
@@ -317,11 +317,11 @@
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-[10px] font-semibold text-gray-400 mb-1">表面（画像URL）</label>
-            <input type="text" id="inputFrontImgUrl" value="IMG_7545.jpg" class="w-full bg-[#1b1714] border border-gray-700 rounded px-3 py-2 text-xs text-white focus:outline-none focus:border-[#ceba8c]">
+            <input type="text" id="inputFrontImg" value="IMG_7545.jpg" class="w-full bg-[#1b1714] border border-gray-700 rounded px-3 py-2 text-xs text-white focus:outline-none focus:border-[#ceba8c]">
           </div>
           <div>
             <label class="block text-[10px] font-semibold text-gray-400 mb-1">裏面（画像URL）</label>
-            <input type="text" id="inputBackImgUrl" value="IMG_7546うら.jpg" class="w-full bg-[#1b1714] border border-gray-700 rounded px-3 py-2 text-xs text-white focus:outline-none focus:border-[#ceba8c]">
+            <input type="text" id="inputBackImg" value="IMG_7546うら.jpg" class="w-full bg-[#1b1714] border border-gray-700 rounded px-3 py-2 text-xs text-white focus:outline-none focus:border-[#ceba8c]">
           </div>
         </div>
 
@@ -359,7 +359,8 @@
             </div>
             <div class="mt-1">
               <label class="block text-[9px] text-gray-500">連動する住所テキスト (Google Maps検索用)</label>
-              <input type="text" id="inputVCardAddr" value="〒761-0312 香川県高松市東山崎町347-7" class="w-full bg-[#2a2420] border border-gray-700 rounded px-2 py-1 text-[11px] text-white">
+              <!-- 🌟 IDをJavaScriptと完全一致させた -->
+              <input type="text" id="inputAddr" value="〒761-0312 香川県高松市東山崎町347-7" class="w-full bg-[#2a2420] border border-gray-700 rounded px-2 py-1 text-[11px] text-white">
             </div>
           </div>
 
@@ -373,7 +374,7 @@
             </div>
             <div class="mt-1">
               <label class="block text-[9px] text-gray-500">連動する代表電話</label>
-              <input type="text" id="inputVCardTel" value="(087) 847-6116" class="w-full bg-[#2a2420] border border-gray-700 rounded px-2 py-1 text-[11px] text-white">
+              <input type="text" id="inputTel" value="(087) 847-6116" class="w-full bg-[#2a2420] border border-gray-700 rounded px-2 py-1 text-[11px] text-white">
             </div>
           </div>
 
@@ -387,7 +388,7 @@
             </div>
             <div class="mt-1">
               <label class="block text-[9px] text-gray-500">連動するFAX</label>
-              <input type="text" id="inputVCardFax" value="(087) 847-6195" class="w-full bg-[#2a2420] border border-gray-700 rounded px-2 py-1 text-[11px] text-white">
+              <input type="text" id="inputFax" value="(087) 847-6195" class="w-full bg-[#2a2420] border border-gray-700 rounded px-2 py-1 text-[11px] text-white">
             </div>
           </div>
 
@@ -401,7 +402,7 @@
             </div>
             <div class="mt-1">
               <label class="block text-[9px] text-gray-500">連動する携帯番号</label>
-              <input type="text" id="inputVCardMobile" value="080-1992-2079" class="w-full bg-[#2a2420] border border-gray-700 rounded px-2 py-1 text-[11px] text-white">
+              <input type="text" id="inputMobile" value="080-1992-2079" class="w-full bg-[#2a2420] border border-gray-700 rounded px-2 py-1 text-[11px] text-white">
             </div>
           </div>
 
@@ -415,7 +416,7 @@
             </div>
             <div class="mt-1">
               <label class="block text-[9px] text-gray-500">連動するEmail</label>
-              <input type="text" id="inputVCardEmail" value="kyokuto@mwb.biglobe.ne.jp" class="w-full bg-[#2a2420] border border-gray-700 rounded px-2 py-1 text-[11px] text-white">
+              <input type="text" id="inputEmail" value="kyokuto@mwb.biglobe.ne.jp" class="w-full bg-[#2a2420] border border-gray-700 rounded px-2 py-1 text-[11px] text-white">
             </div>
           </div>
 
@@ -424,15 +425,16 @@
             <div class="grid grid-cols-2 gap-3">
               <div>
                 <label class="text-[9px] text-gray-500">会社名</label>
-                <input type="text" id="inputVCardCompany" value="極東興業株式会社" class="w-full bg-[#2a2420] border border-gray-700 rounded px-2 py-1 text-[11px] text-white">
+                <!-- 🌟 IDをJavaScriptと完全一致させた -->
+                <input type="text" id="inputComp" value="極東興業株式会社" class="w-full bg-[#2a2420] border border-gray-700 rounded px-2 py-1 text-[11px] text-white">
               </div>
               <div>
                 <label class="text-[9px] text-gray-500">氏名</label>
-                <input type="text" id="inputVCardName" value="野﨑 元宏" class="w-full bg-[#2a2420] border border-gray-700 rounded px-2 py-1 text-[11px] text-white">
+                <input type="text" id="inputName" value="野﨑 元宏" class="w-full bg-[#2a2420] border border-gray-700 rounded px-2 py-1 text-[11px] text-white">
               </div>
               <div class="col-span-2">
                 <label class="text-[9px] text-gray-500">WEBサイトURL（裏面用・保存用）</label>
-                <input type="text" id="inputVCardWeb" value="https://kyokutoukougyou.net/" class="w-full bg-[#2a2420] border border-gray-700 rounded px-2 py-1 text-[11px] text-white">
+                <input type="text" id="inputHp" value="https://kyokutoukougyou.net/" class="w-full bg-[#2a2420] border border-gray-700 rounded px-2 py-1 text-[11px] text-white">
               </div>
             </div>
           </div>
@@ -447,8 +449,6 @@
        CORE LOGIC
        ======================================================================= -->
   <script>
-    let globalCardData = {};
-
     const cardContainer = document.getElementById('cardContainer');
     const cardTilt = document.getElementById('cardTilt'); 
     let currentX = 0, currentY = 0, targetX = 0, targetY = 0;
@@ -528,18 +528,18 @@
 
     // --- 🌟 vCard (連絡先保存) 完全強化ロジック ---
     function downloadVCard() {
-      const org = document.getElementById('inputVCardCompany').value;
-      const name = document.getElementById('inputVCardName').value;
+      const org = document.getElementById('inputComp').value;
+      const name = document.getElementById('inputName').value;
       const title = '営業部長'; 
-      const tel = document.getElementById('inputVCardTel').value;
-      const mobile = document.getElementById('inputVCardMobile').value;
-      const fax = document.getElementById('inputVCardFax').value;
-      const email = document.getElementById('inputVCardEmail').value;
-      const address = document.getElementById('inputVCardAddr').value;
+      const tel = document.getElementById('inputTel').value;
+      const mobile = document.getElementById('inputMobile').value;
+      const fax = document.getElementById('inputFax').value;
+      const email = document.getElementById('inputEmail').value;
+      const address = document.getElementById('inputAddr').value;
       
       // 🌟 デジタル名刺自体のURLと会社HPのURLを取得
       const myCardUrl = window.location.href;
-      const companyHp = document.getElementById('inputVCardWeb').value;
+      const companyHp = document.getElementById('inputHp').value;
 
       // 🌟 vCardの内容にURLとGoogleマップリンクを全て追加
       const lines = [
@@ -572,14 +572,11 @@
 
     // --- 🌟 リンク同期・エフェクト処理 ---
     function syncStudioToView() {
-      const fImg = document.getElementById('inputFrontImgUrl').value.trim();
-      const bImg = document.getElementById('inputBackImgUrl').value.trim();
+      // 🌟 画像URLの反映 (ID修正済み)
+      const fImg = document.getElementById('inputFrontImg').value.trim();
+      const bImg = document.getElementById('inputBackImg').value.trim();
       if (fImg !== "") { document.getElementById('viewFrontImg').src = encodeURI(fImg); }
       if (bImg !== "") { document.getElementById('viewBackImg').src = encodeURI(bImg); }
-
-      // 🌟 エラー原因だった不要な会社名更新コードを完全に削除し、安全チェックを追加
-      const dispComp = document.getElementById('dispCompany');
-      if (dispComp) { dispComp.textContent = document.getElementById('inputVCardCompany').value; }
 
       // 住所ホットスポットの座標反映
       const linkAddr = document.getElementById('linkAddr');
@@ -598,17 +595,17 @@
       });
 
       // 🌟 Google Maps リンクの完全生成 (郵便番号を除去して検索クエリ化)
-      const rawAddress = document.getElementById('inputVCardAddr').value;
+      const rawAddress = document.getElementById('inputAddr').value;
       const cleanAddress = rawAddress.replace(/〒?\d{3}-\d{4}\s*/, '').trim();
       linkAddr.href = cleanAddress ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(cleanAddress)}` : '#';
       
-      document.getElementById('linkTel').href = `tel:${document.getElementById('inputVCardTel').value.replace(/[^\d-]/g, '')}`;
-      document.getElementById('linkFax').href = `tel:${document.getElementById('inputVCardFax').value.replace(/[^\d-]/g, '')}`;
-      document.getElementById('linkMobile').href = `tel:${document.getElementById('inputVCardMobile').value.replace(/[^\d-]/g, '')}`;
-      document.getElementById('linkEmail').href = `mailto:${document.getElementById('inputVCardEmail').value.trim()}`;
+      document.getElementById('linkTel').href = `tel:${document.getElementById('inputTel').value.replace(/[^\d-]/g, '')}`;
+      document.getElementById('linkFax').href = `tel:${document.getElementById('inputFax').value.replace(/[^\d-]/g, '')}`;
+      document.getElementById('linkMobile').href = `tel:${document.getElementById('inputMobile').value.replace(/[^\d-]/g, '')}`;
+      document.getElementById('linkEmail').href = `mailto:${document.getElementById('inputEmail').value.trim()}`;
 
-      // 裏面QRとURL
-      const webUrl = document.getElementById('inputVCardWeb').value;
+      // 🌟 裏面QRとURL (ID修正済み: inputHp)
+      const webUrl = document.getElementById('inputHp').value;
       if(webUrl) {
         const safeUrl = /^https?:\/\//i.test(webUrl) ? webUrl : 'https://' + webUrl;
         document.getElementById('qrCode').src = "https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=" + encodeURIComponent(safeUrl);
@@ -618,10 +615,11 @@
         document.getElementById('websiteText').textContent = displayUrl;
         
         const webBack = document.getElementById('linkWeb');
-        webBack.style.setProperty('--el-x', 15);  
-        webBack.style.setProperty('--el-y', 470); 
-        webBack.style.setProperty('--el-w', 150); 
-        webBack.style.setProperty('--el-h', 50);  
+        // QRコード枠とぴったり重ねる (左下10px)
+        webBack.style.setProperty('--el-x', 10);  
+        webBack.style.setProperty('--el-y', 500); 
+        webBack.style.setProperty('--el-w', 140); 
+        webBack.style.setProperty('--el-h', 40);  
         webBack.href = safeUrl;
         
         document.getElementById('qrContainer').style.display = 'flex';
@@ -641,18 +639,11 @@
       rootF.classList.toggle('has-sweep-shine', sweepShine);
       rootB.classList.toggle('has-sweep-shine', sweepShine);
       document.body.classList.toggle('has-border-sweep', borderSweep);
-      
-      // エンボス（浮き出し）強調フィルターの適用
       rootF.classList.toggle('has-emboss-filter', embossFilter);
     }
 
     function init() {
-      try {
-        const rawData = document.getElementById('gas-data').textContent.trim();
-        if (rawData) globalCardData = JSON.parse(rawData);
-      } catch(e) { console.warn("JSON Parse Error", e); }
-
-      // 初回同期を実行
+      // 🌟 初回同期を確実に実行 (これによりリンクやQRが初期化される)
       syncStudioToView();
 
       const urlParams = new URLSearchParams(window.location.search);
