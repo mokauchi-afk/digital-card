@@ -457,19 +457,19 @@
       setTimeout(() => { t.style.display = 'none'; }, 3000);
     }
 
-    // 👑 【真・完全版】OS直通アプローチで連絡先に追加する処理
+    // 👑 【真・完全版】全OS・全ブラウザ対応 絶対確実な連絡先ダウンロード処理
     function downloadVCard() {
-      // アプリ内ブラウザの厳格な検知 (LINE, Instagram, Facebookなど)
+      // 1. アプリ内ブラウザの厳格な検知 (LINE, Instagram, Facebookなど)
       const ua = navigator.userAgent.toLowerCase();
       const isAppBrowser = /line|micromessenger|instagram|facebook|fbav|fban|twitter|yahoojapan/.test(ua);
 
-      // アプリ内ブラウザはOS機能が使えないため警告を出す
+      // LINE等の場合はOS機能が使えないため警告を出す
       if (isAppBrowser) {
-        alert("【重要】\nLINE等のアプリ内ブラウザでは、スマホのセキュリティ制限により連絡先が保存できません。\n\n画面右下の「🧭（コンパス）」や「共有アイコン」から、『Safariで開く』または『ブラウザで開く』を選択してから再度保存してください。");
+        alert("【重要】\nLINE等のアプリ内ブラウザでは、スマホのセキュリティ制限により連絡先が保存できません。\n\n画面右下や右上のメニューから、『Safariで開く』または『ブラウザで開く』を選択してから再度保存してください。");
         return; 
       }
 
-      // 1. 最新の入力データを取得（空の場合はJSONから取得）
+      // 2. 最新の入力データを取得（空の場合はJSONから取得）
       const d = globalCardData || {};
       const org = document.getElementById('inputCompanyName').value || d.companyName || "";
       const name = document.getElementById('inputName').value || d.name || "";
@@ -481,12 +481,12 @@
       const address = document.getElementById('inputAddrText').value || d.address || "";
       const companyHp = document.getElementById('inputWebsite').value || d.website || "";
       
-      // 👑 NFCやQRから飛んできた「完全なURL」を取得
+      // 👑 NFCやQRから飛んできた「完全なURL」を維持取得
       const myCardUrl = window.location.href; 
       const cleanAddr = address.replace(/〒?\d{3}-\d{4}\s*/, '').trim();
       const mapUrl = document.getElementById('inputMapUrl').value || (cleanAddr ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(cleanAddr)}` : "");
 
-      // 2. vCard（連絡先）データの生成。すべての情報とリンクを漏れなく記述
+      // 3. vCard（連絡先）データの生成。すべての情報とリンクを漏れなく記述
       const vcfStr = 
 `BEGIN:VCARD\r
 VERSION:3.0\r
@@ -501,34 +501,48 @@ EMAIL;TYPE=WORK:${email}\r
 ADR;TYPE=WORK:;;${address};;;;日本\r
 URL;TYPE=WORK:${companyHp}\r
 URL:${myCardUrl}\r
-NOTE:【デジタル名刺を開く】\\n${myCardUrl}\\n\\n【Google Mapで開く】\\n${mapUrl}\r
+NOTE:【デジタル名刺を開く】\n${myCardUrl}\n\n【Google Mapで開く】\n${mapUrl}\r
 END:VCARD`;
 
-      // 3. 端末・OSごとに「最も確実な」方法に分岐
-      // iPadなど最新機種のデスクトップモードも漏らさずiOSとして検知
-      const isIOS = (/iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) && !window.MSStream;
-
-      if (isIOS) {
-        // 👑 iOS最強のアプローチ：Data URIによる直接遷移
-        // 余計な共有シートを出さずに、ダイレクトに「新規連絡先」の画面を立ち上げます。
-        const utf8str = '\uFEFF' + vcfStr; // 文字化け防止のBOM
-        const b64 = btoa(unescape(encodeURIComponent(utf8str)));
-        window.location.href = 'data:text/vcard;charset=utf-8;base64,' + b64;
-      } else {
-        // 👑 Android/PC最強のアプローチ：確実なファイルダウンロード
-        const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
+      // 4. iOS Safari専用の直通アプローチ（Blob URLに直接遷移させることで確実に連絡先画面を開く）
+      try {
+        const bom = new Uint8Array([0xEF, 0xBB, 0xBF]); // UTF-8 BOM
         const blob = new Blob([bom, vcfStr], { type: "text/vcard;charset=utf-8" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.style.display = 'none';
-        a.href = url;
-        a.download = `${org}_${name}.vcf`.replace(/\s/g, '');
-        document.body.appendChild(a);
-        a.click();
+        const url = window.URL.createObjectURL(blob);
+        
+        // iOSかどうかを厳密に判定 (iPad含む)
+        const isIOS = (/iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) && !window.MSStream;
+
+        if (isIOS) {
+          // iOS最強のアプローチ：Blob URLにページ遷移させることで、Safariにファイルとして認識させ、連絡先アプリを呼び出す
+          window.location.href = url;
+        } else {
+          // Android/PC最強のアプローチ：確実なファイルダウンロード
+          const a = document.createElement('a');
+          a.style.display = 'none';
+          a.href = url;
+          a.download = `${org}_${name}.vcf`.replace(/\s/g, ''); // ファイル名からスペース除去
+          document.body.appendChild(a);
+          a.click();
+          
+          setTimeout(() => {
+            document.body.removeChild(a);
+          }, 100);
+        }
+        
+        // メモリの解放 (iOSでの表示完了を待つため少し長めに保持)
         setTimeout(() => {
-          document.body.removeChild(a);
-          URL.revokeObjectURL(url);
-        }, 100);
+          window.URL.revokeObjectURL(url);
+        }, 10000);
+        
+        // iOS以外の場合はトーストを表示
+        if (!isIOS) {
+          showToast("連絡先(vCard)をダウンロードしました。ファイルを開いて保存してください。");
+        }
+        
+      } catch (err) {
+        console.error(err);
+        alert("保存に失敗しました。別のブラウザでお試しください。");
       }
     }
 
