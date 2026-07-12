@@ -234,12 +234,12 @@
               <!-- ホットスポット -->
               <a id="hsAddr" href="#" target="_blank" rel="noopener noreferrer" class="coord-target" data-label="📍 地図"></a>
               <a id="hsTel" href="#" class="coord-target" data-label="📞 代表電話"></a>
-              <div id="hsFax" class="coord-target" data-label="📠 FAX"></div> <!-- 👑 修正: FAXはリンクなし -->
+              <div id="hsFax" class="coord-target" data-label="📠 FAX"></div>
               <a id="hsMobile" href="#" class="coord-target" data-label="📱 携帯"></a>
               <a id="hsEmail" href="#" class="coord-target" data-label="✉️ メール"></a>
               
-              <!-- エンボスロゴ画像 -->
-              <img id="logoFoil" src="" class="foil-logo" alt="ロゴ">
+              <!-- エンボスロゴ画像 (エラー時は非表示にする処理を追加) -->
+              <img id="logoFoil" src="" class="foil-logo" alt="ロゴ" onerror="this.style.display='none';">
             </div>
           </div>
 
@@ -256,7 +256,7 @@
             
             <!-- QRコードとURL -->
             <div class="back-info" id="qrContainer">
-              <img id="qrCode" src="" alt="QR"> <!-- 👑 修正: ID一致 -->
+              <img id="qrCode" src="" alt="QR">
               <div class="back-info-text">
                 <div class="back-info-label">WEB SITE</div>
                 <div class="back-info-url" id="websiteText"></div>
@@ -280,8 +280,8 @@
       </button>
 
       <!-- 👑 修正: 連絡先保存ボタン (GitHub Pages 最強アプローチ) -->
-      <!-- JSによる動的生成は廃止し、同梱のcontact.vcfを直接ダウンロードさせます -->
-      <a href="contact.vcf" download="contact.vcf" onclick="return checkAppBrowser(event)" class="w-full py-3.5 bg-gradient-to-r from-[#211a13] via-[#120e0a] to-[#211a13] text-[#ceba8c] border border-[#6b5842] rounded-lg font-serif tracking-[0.2em] text-xs flex items-center justify-center gap-2 shadow-xl hover:border-[#8e765a] hover:text-white transition active:scale-[0.97] duration-150 relative z-20">
+      <!-- download="contact.vcf"を削除し、純粋なリンクとすることでiOSで確実に連絡先アプリを立ち上げます -->
+      <a href="contact.vcf" onclick="return checkAppBrowser(event)" class="w-full py-3.5 bg-gradient-to-r from-[#211a13] via-[#120e0a] to-[#211a13] text-[#ceba8c] border border-[#6b5842] rounded-lg font-serif tracking-[0.2em] text-xs flex items-center justify-center gap-2 shadow-xl hover:border-[#8e765a] hover:text-white transition active:scale-[0.97] duration-150 relative z-20">
         <i class="fa-solid fa-address-card"></i>
         連絡先を保存
       </a>
@@ -553,6 +553,8 @@
       if (viewBack && bImg) viewBack.src = encodeURI(bImg);
       const logoFoil = document.getElementById('logoFoil');
       if (logoFoil) {
+        // 👑 修正: ロゴ画像が見つからない時は「?」マークを出さずに非表示にする
+        logoFoil.onerror = () => { logoFoil.style.display = 'none'; };
         if (lImg) { logoFoil.src = encodeURI(lImg); logoFoil.style.display = 'block'; }
         else { logoFoil.style.display = 'none'; }
       }
@@ -566,25 +568,23 @@
       const companyHp = document.getElementById('inHpUrl')?.value || "";
       const inputMapUrl = document.getElementById('inMapUrl')?.value || "";
 
-      // 3. 👑 修正: リンクの更新（電話リンク死の防止とFAXのリンク除外）
+      // 3. リンクの更新
       const cleanAddr = address.replace(/〒?\d{3}-\d{4}\s*/, '').trim();
       const mapUrl = inputMapUrl || (cleanAddr ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(cleanAddr)}` : '#');
       
       const linkMap = {
         'hsAddr': mapUrl,
         'hsTel': telMain ? `tel:${telMain.replace(/[^\d+()]/g, '')}` : '#',
-        // hsFaxはリンク要素から除外したため処理しない
         'hsMobile': telMobile ? `tel:${telMobile.replace(/[^\d+()]/g, '')}` : '#',
         'hsEmail': email ? `mailto:${email.trim()}` : '#'
       };
       
-      // 不具合修正：完全一致の比較を避け、正しく href に代入する
       for (const [id, url] of Object.entries(linkMap)) {
         const el = document.getElementById(id);
         if (el) el.href = url;
       }
 
-      // 👑 修正: HP & QR更新 (IDの完全一致化 `qrCode`)
+      // HP & QR更新
       const qrContainer = document.getElementById('qrContainer');
       const hsHp = document.getElementById('hsHp');
       if(companyHp) {
@@ -627,7 +627,7 @@
       };
       applyC('a', 'hsAddr');
       applyC('t1', 'hsTel');
-      applyC('f', 'hsFax'); // FAXの座標更新は維持
+      applyC('f', 'hsFax'); 
       applyC('t2', 'hsMobile');
       applyC('e', 'hsEmail');
       applyC('logo', 'logoFoil');
